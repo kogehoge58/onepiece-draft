@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>マルチプレイヤー入力共有</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script defer src="/script.js"></script>
+  <style>
+    .player-box {
+      float: left;
+      margin: 10px;
+      padding: 10px;
+      border: 2px solid #ccc;
+    }
+    .entry {
+      border: 1px solid #999;
+      margin: 4px;
+      padding: 4px;
+      width: 150px;
+      height: 30px;
+    }
+    .entry-title {
+      font-weight: bold;
+    }
+    .unset {
+      color: red;
+    }
+    .set {
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h1>表示枠同期チャット</h1>
+  <div id="players-container"></div>
+
+  <div>
+    <h2>入力</h2>
+    <form id="inputForm">
+      <div id="radioButtons"></div>
+      <input type="text" id="inputText" placeholder="入力してください">
+      <button type="submit">決定</button>
+    </form>
+  </div>
+</body>
+</html>
