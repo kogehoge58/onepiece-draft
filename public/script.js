@@ -64,11 +64,42 @@ searchInput.addEventListener("input", () => {
   characterList.innerHTML = "";
 
   const filtered = characters.filter(c => c.name.includes(keyword));
+
+  const table = document.createElement("table");
+  table.style.borderCollapse = "collapse";
+  table.style.width = "100%";
+  table.style.tableLayout = "fixed";
+
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+  ["名前", "コスト", "組織", "役職", "能力"].forEach(header => {
+    const th = document.createElement("th");
+    th.textContent = header;
+    th.style.border = "1px solid #ccc";
+    th.style.padding = "4px";
+    th.style.background = "#eee";
+    th.style.wordBreak = "break-word";
+    th.style.whiteSpace = "normal";
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
   filtered.forEach(char => {
-    const li = document.createElement("li");
-    li.textContent = char.name;
-    li.style.cursor = "pointer";
-    li.addEventListener("click", () => {
+    const row = document.createElement("tr");
+
+    const nameTd = document.createElement("td");
+    nameTd.style.border = "1px solid #ccc";
+    nameTd.style.padding = "4px";
+    nameTd.style.wordBreak = "break-word";
+    nameTd.style.whiteSpace = "normal";
+
+    const link = document.createElement("a");
+    link.textContent = char.name;
+    link.href = "#";
+    link.style.cursor = "pointer";
+    link.addEventListener("click", () => {
       const slot = inputForm.slot.value;
       socket.emit("new-entry", {
         player: playerId,
@@ -77,8 +108,24 @@ searchInput.addEventListener("input", () => {
       });
       dialog.close();
     });
-    characterList.appendChild(li);
+    nameTd.appendChild(link);
+    row.appendChild(nameTd);
+
+    ["cost", "organization", "position", "ability"].forEach(key => {
+      const td = document.createElement("td");
+      td.textContent = char[key];
+      td.style.border = "1px solid #ccc";
+      td.style.padding = "4px";
+      td.style.wordBreak = "break-word";
+      td.style.whiteSpace = "normal";
+      row.appendChild(td);
+    });
+
+    tbody.appendChild(row);
   });
+
+  table.appendChild(tbody);
+  characterList.appendChild(table);
 });
 
 socket.on("update-entry", ({ player, slot, text }) => {
