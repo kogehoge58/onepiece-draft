@@ -214,6 +214,48 @@ for (let i = 1; i <= 5; i++) {
   radioButtons.appendChild(label);
 }
 
+// 削除ボタン生成
+const deleteButton = document.getElementById("deleteButton");
+deleteButton.addEventListener("click", () => {
+  const slot = inputForm.slot.value;
+  if (!slot) return;
+
+  // ソケットで他プレイヤーにも通知
+  socket.emit("new-entry", {
+    player: playerId,
+    slot,
+    text: "未設定"
+  });
+
+  // 表示をクリア（自分用）
+  const target = document.getElementById(`entry-${playerId}-${slot}`);
+  if (!target) return;
+
+  const nameLine = target.querySelector(".name-line");
+  if (nameLine) nameLine.textContent = "未設定";
+
+  const costEl = target.querySelector(".cost-span");
+  if (costEl) costEl.textContent = "コスト：-";
+
+  target.classList.remove("set");
+  target.classList.add("unset");
+
+  // コスト再計算
+  let total = 0;
+  for (let i = 1; i <= 5; i++) {
+    const entryEl = document.getElementById(`entry-${playerId}-${i}`);
+    if (!entryEl) continue;
+    const name = entryEl.querySelector(".name-line")?.textContent;
+    const c = characters.find((c) => c.name === name);
+    if (c) total += c.cost;
+  }
+
+  const span = document.querySelector(`#box-${playerId} .cost-total`);
+  if (span) {
+    span.textContent = `（コスト合計：${total}）`;
+  }
+});
+
 // ダイアログ開く時：検索欄＆トグル初期化
 inputForm.addEventListener("submit", (e) => {
   e.preventDefault();
@@ -311,17 +353,26 @@ socket.on("update-entry", ({ player, slot, text }) => {
   const nameEl = el.querySelector(".name-line");
   if (nameEl) nameEl.textContent = text;
 
-  el.classList.remove("unset");
-  el.classList.add("set");
+  // ↓ ここで「未設定」かどうか判定を追加する
+  if (text === "未設定") {
+    el.classList.remove("set");
+    el.classList.add("unset");
+  } else {
+    el.classList.remove("unset");
+    el.classList.add("set");
+  }
 
+  // 自分の欄だけコスト反映や合計処理を続ける
   if (player === playerId) {
     const character = characters.find(c => c.name === text);
     const costEl = el.querySelector(".cost-span");
     if (character && costEl) {
       costEl.textContent = `コスト：${character.cost}`;
+    } else if (costEl) {
+      costEl.textContent = "コスト：-";
     }
 
-    // ▼ 合計コストを再計算
+    // 合計コスト再計算
     let total = 0;
     for (let i = 1; i <= 5; i++) {
       const entryEl = document.getElementById(`entry-${playerId}-${i}`);
@@ -331,15 +382,17 @@ socket.on("update-entry", ({ player, slot, text }) => {
       if (c) total += c.cost;
     }
 
-    // ▼ span に反映
     const span = document.querySelector(`#box-${playerId} .cost-total`);
     if (span) {
       span.textContent = `（コスト合計：${total}）`;
     }
   } else {
-    // 他人の欄は名前だけ「設定済み」に変える
-    const nameEl = el.querySelector(".name-line");
-    if (nameEl) nameEl.textContent = "設定済み";
+    // 他人の欄も text に応じて表示
+    if (text === "未設定") {
+      if (nameEl) nameEl.textContent = "未設定";
+    } else {
+      if (nameEl) nameEl.textContent = "設定済み";
+    }
   }
 });
 
