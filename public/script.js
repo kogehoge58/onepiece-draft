@@ -237,6 +237,9 @@ deleteButton.addEventListener("click", () => {
   const costEl = target.querySelector(".cost-span");
   if (costEl) costEl.textContent = "コスト：-";
 
+  const roleSpan = target.querySelector('span[contenteditable]');
+  if (roleSpan) roleSpan.textContent = "入力する";
+
   target.classList.remove("set");
   target.classList.add("unset");
 
