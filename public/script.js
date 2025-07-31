@@ -137,6 +137,7 @@ players.forEach((player) => {
 
     const nameLine = document.createElement("div");
     nameLine.textContent = "未設定";
+    nameLine.className = "name-line";
     entry.appendChild(nameLine);
 
     if (player === playerId) {
@@ -150,6 +151,7 @@ players.forEach((player) => {
 
       const costSpan = document.createElement("span");
       costSpan.textContent = "コスト：-";
+      costSpan.className = "cost-span";
 
       const roleSpan = document.createElement("span");
       roleSpan.textContent = " / 役職：";
@@ -296,8 +298,21 @@ socket.on("update-entry", ({ player, slot, text }) => {
   const el = document.getElementById(targetId);
   if (!el) return;
 
+  const nameEl = el.querySelector(".name-line");
+  if (nameEl) nameEl.textContent = text;
+
   el.classList.remove("unset");
   el.classList.add("set");
 
-  el.textContent = (player === playerId) ? `${text}` : `設定済み`;
+  if (player === playerId) {
+    const character = characters.find(c => c.name === text);
+    const costEl = el.querySelector(".cost-span");
+    if (character && costEl) {
+      costEl.textContent = `コスト：${character.cost}`;
+    }
+  } else {
+    // 他人の欄は名前だけ「設定済み」に変える
+    const nameEl = el.querySelector(".name-line");
+    if (nameEl) nameEl.textContent = "設定済み";
+  }
 });
