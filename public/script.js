@@ -117,6 +117,16 @@ players.forEach((player) => {
   box.id = `box-${player}`;
   const title = document.createElement("h3");
   title.textContent = `プレイヤー ${player}`;
+
+  if (player === playerId) {
+    const costTotalSpan = document.createElement("span");
+    costTotalSpan.className = "cost-total";
+    costTotalSpan.textContent = "（コスト合計：0）";
+    costTotalSpan.style.fontSize = "14px";
+    costTotalSpan.style.marginLeft = "8px";
+    title.appendChild(costTotalSpan);
+  }
+
   box.appendChild(title);
 
   for (let i = 1; i <= 5; i++) {
@@ -309,6 +319,22 @@ socket.on("update-entry", ({ player, slot, text }) => {
     const costEl = el.querySelector(".cost-span");
     if (character && costEl) {
       costEl.textContent = `コスト：${character.cost}`;
+    }
+
+    // ▼ 合計コストを再計算
+    let total = 0;
+    for (let i = 1; i <= 5; i++) {
+      const entryEl = document.getElementById(`entry-${playerId}-${i}`);
+      if (!entryEl) continue;
+      const name = entryEl.querySelector(".name-line")?.textContent;
+      const c = characters.find(c => c.name === name);
+      if (c) total += c.cost;
+    }
+
+    // ▼ span に反映
+    const span = document.querySelector(`#box-${playerId} .cost-total`);
+    if (span) {
+      span.textContent = `（コスト合計：${total}）`;
     }
   } else {
     // 他人の欄は名前だけ「設定済み」に変える
