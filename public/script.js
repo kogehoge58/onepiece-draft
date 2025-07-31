@@ -136,6 +136,19 @@ players.forEach((player) => {
     entry.id = `entry-${player}-${i}`;
     entry.textContent = `未設定`;
 
+    if (player === playerId) {
+      entry.style.display = "flex";
+      entry.style.flexDirection = "column";
+      entry.style.alignItems = "flex-start";
+
+      const infoLine = document.createElement("div");
+      infoLine.textContent = "コスト：- / 役職：-";
+      infoLine.style.fontSize = "12px";
+      infoLine.style.color = "#555";
+      infoLine.className = "info-line";
+      entry.appendChild(infoLine);
+    }
+
     wrapper.appendChild(label);
     wrapper.appendChild(entry);
     box.appendChild(wrapper);
