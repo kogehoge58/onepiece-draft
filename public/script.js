@@ -316,3 +316,33 @@ socket.on("update-entry", ({ player, slot, text }) => {
     if (nameEl) nameEl.textContent = "設定済み";
   }
 });
+
+// ドラフトボタン処理
+const draftButton = document.getElementById("draftButton");
+draftButton.addEventListener("click", () => {
+  const confirmDialog = document.createElement("dialog");
+  confirmDialog.innerHTML = `
+    <p style="margin-bottom: 20px;">
+      ドラフトを開始します。各プレイヤーの選出が完了していることを確認し、<br>
+      よろしければ「開始」を押してください。
+    </p>
+    <div style="text-align: right;">
+      <button id="startDraftBtn">開始</button>
+      <button id="cancelDraftBtn">戻る</button>
+    </div>
+  `;
+  document.body.appendChild(confirmDialog);
+  confirmDialog.showModal();
+
+  document.getElementById("startDraftBtn").addEventListener("click", () => {
+    confirmDialog.close();
+    document.body.removeChild(confirmDialog);
+    // ★ 後でドラフト開始処理を書くところ
+    console.log("ドラフト開始処理（仮）");
+  });
+
+  document.getElementById("cancelDraftBtn").addEventListener("click", () => {
+    confirmDialog.close();
+    document.body.removeChild(confirmDialog);
+  });
+});
