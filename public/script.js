@@ -10,60 +10,36 @@ const dialog = document.getElementById("characterDialog");
 const searchInput = document.getElementById("searchInput");
 const characterList = document.getElementById("characterList");
 
-// 全角数字（0〜9）マッピング
+// 全角数字マッピング
 const zenkaku = ["０", "１", "２", "３", "４", "５", "６", "７", "８", "９"];
 
-players.forEach((player) => {
-  const box = document.createElement("div");
-  box.className = "player-box";
-  box.id = `box-${player}`;
-  const title = document.createElement("h3");
-  title.textContent = `プレイヤー ${player}`;
-  box.appendChild(title);
+// コストトグル管理
+const selectedCosts = new Set();
+const costButtons = [];
 
-  for (let i = 1; i <= 5; i++) {
-    const wrapper = document.createElement("div");
-    wrapper.style.display = "flex";
-    wrapper.style.alignItems = "center";
-    wrapper.style.marginBottom = "4px";
+// 検索処理
+function performSearch({ keyword = "" }) {
+  characterList.innerHTML = "";
+  characterList.style.paddingLeft = "0";
 
-    const label = document.createElement("div");
-    label.textContent = `${zenkaku[i]}．`; // 全角数字＋ドット
-    label.style.width = "2em";
-    label.style.textAlign = "right";
-    label.style.marginRight = "4px";
+  let filtered = characters;
 
-    const entry = document.createElement("div");
-    entry.className = "entry unset";
-    entry.id = `entry-${player}-${i}`;
-    entry.textContent = `未設定`;
-
-    wrapper.appendChild(label);
-    wrapper.appendChild(entry);
-    box.appendChild(wrapper);
+  if (selectedCosts.size > 0) {
+    filtered = filtered.filter(c => selectedCosts.has(c.cost));
   }
 
-  container.appendChild(box);
-});
+  if (keyword) {
+    filtered = filtered.filter(c => c.name.includes(keyword));
+  }
 
-for (let i = 1; i <= 5; i++) {
-  const label = document.createElement("label");
-  label.innerHTML = `<input type="radio" name="slot" value="${i}" ${i === 1 ? "checked" : ""}> ${i}番 `;
-  radioButtons.appendChild(label);
-}
-
-inputForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  searchInput.value = "";
-  characterList.innerHTML = "";
-  dialog.showModal();
-});
-
-searchInput.addEventListener("input", () => {
-  const keyword = searchInput.value.trim();
-  characterList.innerHTML = "";
-
-  const filtered = characters.filter(c => c.name.includes(keyword));
+  if (filtered.length === 0) {
+    const msg = document.createElement("div");
+    msg.textContent = "検索結果がありません";
+    msg.style.color = "red";
+    msg.style.fontWeight = "bold";
+    characterList.appendChild(msg);
+    return;
+  }
 
   const table = document.createElement("table");
   table.style.borderCollapse = "collapse";
@@ -80,6 +56,9 @@ searchInput.addEventListener("input", () => {
     th.style.background = "#eee";
     th.style.wordBreak = "break-word";
     th.style.whiteSpace = "normal";
+    if (header === "コスト") {
+      th.style.width = "60px";
+    }
     headerRow.appendChild(th);
   });
   thead.appendChild(headerRow);
@@ -118,6 +97,9 @@ searchInput.addEventListener("input", () => {
       td.style.padding = "4px";
       td.style.wordBreak = "break-word";
       td.style.whiteSpace = "normal";
+      if (key === "cost") {
+        td.style.textAlign = "center";
+      }
       row.appendChild(td);
     });
 
@@ -126,8 +108,138 @@ searchInput.addEventListener("input", () => {
 
   table.appendChild(tbody);
   characterList.appendChild(table);
+}
+
+// プレイヤー欄作成
+players.forEach((player) => {
+  const box = document.createElement("div");
+  box.className = "player-box";
+  box.id = `box-${player}`;
+  const title = document.createElement("h3");
+  title.textContent = `プレイヤー ${player}`;
+  box.appendChild(title);
+
+  for (let i = 1; i <= 5; i++) {
+    const wrapper = document.createElement("div");
+    wrapper.style.display = "flex";
+    wrapper.style.alignItems = "center";
+    wrapper.style.marginBottom = "4px";
+
+    const label = document.createElement("div");
+    label.textContent = `${zenkaku[i]}．`;
+    label.style.width = "2em";
+    label.style.textAlign = "right";
+    label.style.marginRight = "4px";
+
+    const entry = document.createElement("div");
+    entry.className = "entry unset";
+    entry.id = `entry-${player}-${i}`;
+    entry.textContent = `未設定`;
+
+    wrapper.appendChild(label);
+    wrapper.appendChild(entry);
+    box.appendChild(wrapper);
+  }
+
+  container.appendChild(box);
 });
 
+// ラジオボタン生成
+for (let i = 1; i <= 5; i++) {
+  const label = document.createElement("label");
+  label.innerHTML = `<input type="radio" name="slot" value="${i}" ${i === 1 ? "checked" : ""}> ${i}番 `;
+  radioButtons.appendChild(label);
+}
+
+// ダイアログ開く時：検索欄＆トグル初期化
+inputForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  searchInput.value = "";
+  selectedCosts.clear();
+  costButtons.forEach(btn => (btn.style.backgroundColor = ""));
+  characterList.innerHTML = "";
+  dialog.showModal();
+  performSearch({});
+});
+
+// バツボタン
+const closeBtn = document.createElement("button");
+closeBtn.textContent = "×";
+closeBtn.style.position = "absolute";
+closeBtn.style.top = "6px";
+closeBtn.style.right = "10px";
+closeBtn.style.fontSize = "24px";
+closeBtn.style.fontWeight = "bold";
+closeBtn.style.border = "none";
+closeBtn.style.background = "transparent";
+closeBtn.style.cursor = "pointer";
+closeBtn.style.lineHeight = "1";
+closeBtn.style.padding = "4px 8px";
+closeBtn.addEventListener("click", () => dialog.close());
+dialog.appendChild(closeBtn);
+
+// 名前検索
+searchInput.addEventListener("input", () => {
+  const keyword = searchInput.value.trim();
+  performSearch({ keyword });
+});
+
+// ▼ 条件ゾーン生成
+const conditionZone = document.createElement("div");
+conditionZone.style.marginTop = "8px";
+conditionZone.style.display = "inline-block";
+searchInput.insertAdjacentElement("afterend", conditionZone);
+
+// ▼ コストラベル
+const costLabel = document.createElement("span");
+costLabel.textContent = "コスト：";
+costLabel.style.fontWeight = "bold";
+costLabel.style.marginLeft = "12px";
+conditionZone.appendChild(costLabel);
+
+// ▼ コストボタン10個
+for (let i = 1; i <= 10; i++) {
+  const btn = document.createElement("button");
+  btn.textContent = i.toString();
+  btn.style.marginLeft = "4px";
+  btn.type = "button";
+  btn.dataset.cost = i;
+
+  btn.addEventListener("click", () => {
+    const costNum = Number(btn.dataset.cost);
+    if (selectedCosts.has(costNum)) {
+      selectedCosts.delete(costNum);
+      btn.style.backgroundColor = "";
+    } else {
+      selectedCosts.add(costNum);
+      btn.style.backgroundColor = "#aaf";
+    }
+    performSearch({ keyword: searchInput.value.trim() });
+  });
+
+  costButtons.push(btn);
+  conditionZone.appendChild(btn);
+}
+
+// ▼ 条件クリアリンク（右端）
+const clearLink = document.createElement("a");
+clearLink.textContent = "条件クリア";
+clearLink.href = "#";
+clearLink.style.marginLeft = "12px";
+clearLink.style.textDecoration = "underline";
+clearLink.style.color = "#00f";
+clearLink.style.cursor = "pointer";
+clearLink.style.fontSize = "14px";
+clearLink.addEventListener("click", (e) => {
+  e.preventDefault();
+  searchInput.value = "";
+  selectedCosts.clear();
+  costButtons.forEach(btn => (btn.style.backgroundColor = ""));
+  performSearch({});
+});
+conditionZone.appendChild(clearLink);
+
+// ▼ エントリー反映
 socket.on("update-entry", ({ player, slot, text }) => {
   const targetId = `entry-${player}-${slot}`;
   const el = document.getElementById(targetId);
