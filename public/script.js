@@ -134,7 +134,10 @@ players.forEach((player) => {
     const entry = document.createElement("div");
     entry.className = "entry unset";
     entry.id = `entry-${player}-${i}`;
-    entry.textContent = `未設定`;
+
+    const nameLine = document.createElement("div");
+    nameLine.textContent = "未設定";
+    entry.appendChild(nameLine);
 
     if (player === playerId) {
       entry.style.display = "flex";
@@ -142,10 +145,45 @@ players.forEach((player) => {
       entry.style.alignItems = "flex-start";
 
       const infoLine = document.createElement("div");
-      infoLine.textContent = "コスト：- / 役職：-";
       infoLine.style.fontSize = "12px";
       infoLine.style.color = "#555";
-      infoLine.className = "info-line";
+
+      const costSpan = document.createElement("span");
+      costSpan.textContent = "コスト：-";
+
+      const roleSpan = document.createElement("span");
+      roleSpan.textContent = " / 役職：";
+
+      const roleValue = document.createElement("span");
+      roleValue.textContent = "入力する";
+      roleValue.style.textDecoration = "underline";
+      roleValue.style.cursor = "pointer";
+      roleValue.contentEditable = true;
+
+      roleValue.addEventListener("focus", () => {
+        const range = document.createRange();
+        range.selectNodeContents(roleValue);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      });
+
+      roleValue.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          roleValue.blur();
+        }
+      });
+
+      roleValue.addEventListener("blur", () => {
+        if (roleValue.textContent.trim() === "") {
+          roleValue.textContent = "入力する";
+        }
+      });
+
+      roleSpan.appendChild(roleValue);
+      infoLine.appendChild(costSpan);
+      infoLine.appendChild(roleSpan);
       entry.appendChild(infoLine);
     }
 
