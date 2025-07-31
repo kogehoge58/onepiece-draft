@@ -1,3 +1,4 @@
+import { characters } from "./characters.js";
 const socket = io();
 const playerId = prompt("プレイヤー名を入力してください (例: A, B, C)").toUpperCase();
 
@@ -5,7 +6,12 @@ const players = ['A', 'B', 'C'];
 const container = document.getElementById("players-container");
 const radioButtons = document.getElementById("radioButtons");
 const inputForm = document.getElementById("inputForm");
-const inputText = document.getElementById("inputText");
+const dialog = document.getElementById("characterDialog");
+const searchInput = document.getElementById("searchInput");
+const characterList = document.getElementById("characterList");
+
+// 全角数字（0〜9）マッピング
+const zenkaku = ["０", "１", "２", "３", "４", "５", "６", "７", "８", "９"];
 
 players.forEach((player) => {
   const box = document.createElement("div");
@@ -16,11 +22,25 @@ players.forEach((player) => {
   box.appendChild(title);
 
   for (let i = 1; i <= 5; i++) {
+    const wrapper = document.createElement("div");
+    wrapper.style.display = "flex";
+    wrapper.style.alignItems = "center";
+    wrapper.style.marginBottom = "4px";
+
+    const label = document.createElement("div");
+    label.textContent = `${zenkaku[i]}．`; // 全角数字＋ドット
+    label.style.width = "2em";
+    label.style.textAlign = "right";
+    label.style.marginRight = "4px";
+
     const entry = document.createElement("div");
     entry.className = "entry unset";
     entry.id = `entry-${player}-${i}`;
-    entry.textContent = `[${i}] 未設定`;
-    box.appendChild(entry);
+    entry.textContent = `未設定`;
+
+    wrapper.appendChild(label);
+    wrapper.appendChild(entry);
+    box.appendChild(wrapper);
   }
 
   container.appendChild(box);
@@ -34,11 +54,31 @@ for (let i = 1; i <= 5; i++) {
 
 inputForm.addEventListener("submit", (e) => {
   e.preventDefault();
-  const slot = inputForm.slot.value;
-  const text = inputText.value.trim();
-  if (!text) return;
-  socket.emit("new-entry", { player: playerId, slot, text });
-  inputText.value = "";
+  searchInput.value = "";
+  characterList.innerHTML = "";
+  dialog.showModal();
+});
+
+searchInput.addEventListener("input", () => {
+  const keyword = searchInput.value.trim();
+  characterList.innerHTML = "";
+
+  const filtered = characters.filter(c => c.name.includes(keyword));
+  filtered.forEach(char => {
+    const li = document.createElement("li");
+    li.textContent = char.name;
+    li.style.cursor = "pointer";
+    li.addEventListener("click", () => {
+      const slot = inputForm.slot.value;
+      socket.emit("new-entry", {
+        player: playerId,
+        slot: slot,
+        text: char.name
+      });
+      dialog.close();
+    });
+    characterList.appendChild(li);
+  });
 });
 
 socket.on("update-entry", ({ player, slot, text }) => {
@@ -49,10 +89,5 @@ socket.on("update-entry", ({ player, slot, text }) => {
   el.classList.remove("unset");
   el.classList.add("set");
 
-  if (player === playerId) {
-    el.textContent = `[${slot}] ${text}`;
-  } else {
-    el.textContent = `[${slot}] 設定済み`;
-  }
+  el.textContent = (player === playerId) ? `${text}` : `設定済み`;
 });
-
