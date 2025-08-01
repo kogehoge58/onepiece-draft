@@ -54,3 +54,8 @@ app.post("/reset-session", (req, res) => {
   fs.writeFileSync(sessionDataPath, content, "utf8");
   res.sendStatus(200);
 });
+
+app.get("/get-session", (req, res) => {
+  const data = require("./public/sessionData");
+  res.json(data);
+});

@@ -467,3 +467,26 @@ resetBtn.addEventListener("click", async () => {
     console.error("❌ 通信エラー:", err);
   }
 });
+
+socket.on("draft-started", async () => {
+  try {
+    const res = await fetch("/get-session");
+    const session = await res.json();
+
+    Object.entries(session).forEach(([key, { name }]) => {
+      const el = document.getElementById(`entry-${key}`);
+      if (!el) return;
+      const nameLine = el.querySelector(".name-line");
+      if (nameLine) nameLine.textContent = name || "未設定";
+      if (name && name !== "未設定") {
+        el.classList.remove("unset");
+        el.classList.add("set");
+      } else {
+        el.classList.remove("set");
+        el.classList.add("unset");
+      }
+    });
+  } catch (err) {
+    console.error("セッションデータの取得に失敗：", err);
+  }
+});
