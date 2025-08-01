@@ -12,6 +12,10 @@ io.on("connection", (socket) => {
   socket.on("new-entry", (data) => {
     io.emit("update-entry", data);
   });
+
+  socket.on("draft-started", () => {
+    io.emit("draft-started");
+  });
 });
 
 server.listen(3000, () => {

@@ -419,8 +419,7 @@ draftButton.addEventListener("click", () => {
   document.getElementById("startDraftBtn").addEventListener("click", () => {
     confirmDialog.close();
     document.body.removeChild(confirmDialog);
-    // ★ 後でドラフト開始処理を書くところ
-    console.log("ドラフト開始処理（仮）");
+    socket.emit("draft-started");
   });
 
   document.getElementById("cancelDraftBtn").addEventListener("click", () => {
@@ -428,3 +427,9 @@ draftButton.addEventListener("click", () => {
     document.body.removeChild(confirmDialog);
   });
 });
+
+socket.on("draft-started", () => {
+  if (document.hasFocus()) return; // 押した本人には出さない（任意）
+  alert("ドラフトが実行されました。");
+});
+
