@@ -433,3 +433,37 @@ socket.on("draft-started", () => {
   alert("ドラフトが実行されました。");
 });
 
+// 確認用
+const showBtn = document.getElementById("showSessionDataBtn");
+
+showBtn.addEventListener("click", async () => {
+  try {
+    const response = await fetch("/sessionData.js");
+    const text = await response.text();
+
+    // モジュール形式ではなく単なるJSとして取得されるのでeval回避のため加工
+    const jsonText = text.replace("module.exports =", "").trim().replace(/;$/, "");
+    const data = JSON.parse(jsonText);
+    console.log("▼ sessionData.js の中身");
+    console.log(data);
+  } catch (error) {
+    console.error("sessionData.js の取得に失敗:", error);
+  }
+});
+
+const resetBtn = document.getElementById("resetSessionDataBtn");
+
+resetBtn.addEventListener("click", async () => {
+  if (!confirm("sessionData.js を本当に初期化しますか？")) return;
+  try {
+    const res = await fetch("/reset-session", { method: "POST" });
+    if (res.ok) {
+      console.log("✅ sessionData.js を初期化しました");
+      location.reload(); // ページをリロードして反映（任意）
+    } else {
+      console.error("❌ 初期化失敗:", await res.text());
+    }
+  } catch (err) {
+    console.error("❌ 通信エラー:", err);
+  }
+});
