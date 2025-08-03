@@ -83,7 +83,9 @@ function performSearch({ keyword = "" }) {
       socket.emit("new-entry", {
         player: playerId,
         slot: slot,
-        text: char.name
+        text: char.name,
+        name: char.name,
+        cost: char.cost
       });
       dialog.close();
     });

@@ -24,11 +24,11 @@ app.use(express.static("public"));
 
 io.on("connection", (socket) => {
   socket.on("new-entry", (data) => {
-    const { player, slot, text } = data;
+    const { player, slot, name, cost } = data;
     const key = `${player}-${slot}`;
     if (sessionData[key]) {
-      // name を更新（cost, role は未対応のまま）
-      sessionData[key].name = text;
+      sessionData[key].name = name;
+      sessionData[key].cost = cost ?? null;
     }
 
     io.emit("update-entry", data);
