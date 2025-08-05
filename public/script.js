@@ -152,20 +152,23 @@ players.forEach((player) => {
     nameLine.className = "name-line";
     entry.appendChild(nameLine);
 
+    // ▼ 共通：infoLine を作る（コスト：- / 役職：- or 入力する）
+    entry.style.display = "flex";
+    entry.style.flexDirection = "column";
+    entry.style.alignItems = "flex-start";
+
+    const infoLine = document.createElement("div");
+    infoLine.style.fontSize = "12px";
+    infoLine.style.color = "#555";
+
+    const costSpan = document.createElement("span");
+    costSpan.textContent = "コスト：-";
+    costSpan.className = "cost-span";
+
+    const roleSpan = document.createElement("span");
+    roleSpan.className = "role-span";
+
     if (player === playerId) {
-      entry.style.display = "flex";
-      entry.style.flexDirection = "column";
-      entry.style.alignItems = "flex-start";
-
-      const infoLine = document.createElement("div");
-      infoLine.style.fontSize = "12px";
-      infoLine.style.color = "#555";
-
-      const costSpan = document.createElement("span");
-      costSpan.textContent = "コスト：-";
-      costSpan.className = "cost-span";
-
-      const roleSpan = document.createElement("span");
       roleSpan.textContent = " / 役職：";
 
       const roleValue = document.createElement("span");
@@ -196,10 +199,13 @@ players.forEach((player) => {
       });
 
       roleSpan.appendChild(roleValue);
-      infoLine.appendChild(costSpan);
-      infoLine.appendChild(roleSpan);
-      entry.appendChild(infoLine);
+    } else {
+      roleSpan.textContent = " / 役職：-";
     }
+
+    infoLine.appendChild(costSpan);
+    infoLine.appendChild(roleSpan);
+    entry.appendChild(infoLine);
 
     wrapper.appendChild(label);
     wrapper.appendChild(entry);
