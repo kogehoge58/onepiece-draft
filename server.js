@@ -24,16 +24,18 @@ app.use(express.static("public"));
 
 io.on("connection", (socket) => {
   socket.on("new-entry", (data) => {
-    const { player, slot, name, cost } = data;
+    const { player, slot, name, cost, role } = data;
     const key = `${player}-${slot}`;
     if (sessionData[key]) {
       sessionData[key].name = name;
       sessionData[key].cost = cost ?? null;
+      if (role !== undefined) {
+        sessionData[key].role = role;
+      }
     }
 
     io.emit("update-entry", data);
 
-    // ファイルに書き込み
     const fileContent = "module.exports = " + JSON.stringify(sessionData, null, 2) + ";\n";
     fs.writeFileSync(sessionDataPath, fileContent, "utf8");
   });
