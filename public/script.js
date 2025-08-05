@@ -419,31 +419,8 @@ draftButton.addEventListener("click", () => {
   confirmDialog.showModal();
 
   document.getElementById("startDraftBtn").addEventListener("click", () => {
-    for (let i = 1; i <= 5; i++) {
-      const entryEl = document.getElementById(`entry-${playerId}-${i}`);
-      if (!entryEl) continue;
-
-      const name = entryEl.querySelector(".name-line")?.textContent;
-      if (!name || name === "未設定") continue;
-
-      const character = characters.find(c => c.name === name);
-      const cost = character?.cost ?? null;
-
-      const roleEl = entryEl.querySelector('span[contenteditable]');
-      const role = roleEl?.textContent?.trim() === "入力する" ? "" : roleEl?.textContent?.trim();
-
-      socket.emit("new-entry", {
-        player: playerId,
-        slot: i,
-        name,
-        cost,
-        role,
-      });
-    }
-
     confirmDialog.close();
     document.body.removeChild(confirmDialog);
-
     socket.emit("draft-started");
   });
 
